@@ -3,39 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Solana Account</title>
+    <title>Login with GitHub</title>
 </head>
 <body>
-    <h1>Create Solana Account</h1>
-    <form id="accountForm">
-        <label for="email">Email Address: </label>
-        <input type="email" id="email" name="email" required><br><br>
-        <button type="submit">Create Account</button>
-    </form>
+    <h1>Login with GitHub</h1>
+
+    <button id="githubLogin">Login with GitHub</button>
 
     <script>
-        document.getElementById("accountForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
-            const email = document.getElementById("email").value;
+        const clientId = "YOUR_GITHUB_CLIENT_ID";  // Replace with your GitHub OAuth App Client ID
+        const backendUrl = "http://172.31.218.227:3000";  // WSL backend server address
 
-            // Send email to backend API (use the correct URL for WSL)
-            const response = await fetch("http://172.31.218.227:3000/api/create-token", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email })
-            });
-
-            const data = await response.json();
-            console.log(data);
-
-            if (data.success) {
-                alert("Account created successfully! Account info is saved.");
-            } else {
-                alert("Error creating account!");
-            }
+        document.getElementById("githubLogin").addEventListener("click", function() {
+            const redirectUri = "https://etedalpour.github.io/testpage/callback.html";
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user`;
         });
+
+        async function handleGitHubCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get("code");
+
+            if (code) {
+                // Send GitHub OAuth code to WSL backend
+                const response = await fetch(`${backendUrl}/api/github-auth`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.user) {
+                    // Send GitHub user data to backend for storage
+                    await fetch(`${backendUrl}/api/github-login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data.user)
+                    });
+
+                    // Redirect to the second page
+                    window.location.href = "/second-page.html";
+                } else {
+                    alert("GitHub authentication failed!");
+                }
+            }
+        }
+
+        // Run on callback page
+        if (window.location.pathname.includes("callback.html")) {
+            handleGitHubCallback();
+        }
     </script>
 </body>
 </html>
