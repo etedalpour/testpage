@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Wallet</title>
+</head>
+<body>
+    <h1>User Wallet Details</h1>
+    <p><strong>Public Key:</strong> <span id="publicKey">Loading...</span></p>
+    <p><strong>Account Address:</strong> <span id="accountAddress">Loading...</span></p>
+    <p><strong>Wallet Balance:</strong> <span id="walletBalance">Loading...</span> SOL</p>
+
+    <script>
+        async function fetchWalletDetails() {
+            try {
+                const response = await fetch("http://172.31.218.227:3000/api/user-wallet");
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById("publicKey").textContent = data.wallet.publicKey;
+                    document.getElementById("accountAddress").textContent = data.wallet.publicKey; // Same as public key
+                    document.getElementById("walletBalance").textContent = data.wallet.balance;
+                } else {
+                    alert("Error fetching wallet details.");
+                }
+            } catch (error) {
+                console.error("Failed to fetch wallet details:", error);
+            }
+        }
+
+        fetchWalletDetails();
+    </script>
+</body>
+</html>
