@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub OAuth Callback</title>
+</head>
+<body>
+    <h2>Processing GitHub Login...</h2>
+    <script>
+        async function handleGitHubCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get("code");
+
+            if (code) {
+                console.log("GitHub Authorization Code:", code);
+
+                // Send the code to the backend
+                const backendUrl = "http://172.31.218.227:3000"; // WSL Backend
+                const response = await fetch(`${backendUrl}/api/github-auth`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code })
+                });
+
+                const data = await response.json();
+                console.log("Backend Response:", data);
+
+                if (data.success) {
+                    // Redirect to second page with user data
+                    window.location.href = "https://etedalpour.github.io/testpage/second-page.html";
+                } else {
+                    alert("GitHub authentication failed!");
+                }
+            } else {
+                alert("No authorization code found.");
+            }
+        }
+
+        handleGitHubCallback();
+    </script>
+</body>
+</html>
