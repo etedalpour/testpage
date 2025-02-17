@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Solana Account</title>
+</head>
+<body>
+    <h1>Create Solana Account</h1>
+    <form id="accountForm">
+        <label for="email">Email Address: </label>
+        <input type="email" id="email" name="email" required><br><br>
+        <button type="submit">Create Account</button>
+    </form>
+
+    <script>
+        document.getElementById("accountForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            const email = document.getElementById("email").value;
+
+            // Send email to backend API (use the correct URL for WSL)
+            const response = await fetch("http://172.31.218.227:3000/api/create-token", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+            console.log(data);
+
+            if (data.success) {
+                alert("Account created successfully! Account info is saved.");
+            } else {
+                alert("Error creating account!");
+            }
+        });
+    </script>
+</body>
+</html>
