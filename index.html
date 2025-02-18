@@ -20,39 +20,51 @@
         });
 
         async function handleGitHubCallback() {
-            const params = new URLSearchParams(window.location.search);
-            const code = params.get("code");
+    // Get query parameters from URL
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
 
-            if (code) {
-                const response = await fetch(`${backendUrl}/api/github-auth`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ code })
-                });
+    console.log("Current URL:", window.location.href);  // Log current URL to ensure it's correct
+    console.log("Extracted code:", code);  // Log the extracted code (it should be null or a real code)
 
-                const data = await response.json();
+    // Even without the code, let's proceed with the fetch call for debugging
+    console.log("Sending request to backend...");
 
-                if (data.success && data.user) {
-                    // Send GitHub user data to backend for storage
-                    await fetch(`${backendUrl}/api/github-login`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(data.user)
-                    });
+    try {
+        const backendUrl = "https://alietedal.ir:8080"; // Your backend URL
+        
+        // Send a request to your backend API to test
+        const response = await fetch(`${backendUrl}/api/github-auth`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ code: code }) // Sending the code (null if not present)
+        });
 
-                    // Redirect to the second page
-                    window.location.href = "/second-page.html";
-                } else {
-                    alert("GitHub authentication failed!");
-                }
-            }
+        // Log the response status
+        console.log("Response status:", response.status);
+        
+        const data = await response.json();
+        console.log("Backend response:", data);
+        
+        // Handle the response if needed
+        if (data.success) {
+            console.log("GitHub callback successful!");
+        } else {
+            console.log("GitHub callback failed.");
         }
-        handleGitHubCallback();
 
-        // Run on callback page
-        if (window.location.pathname.includes("callback.html")) {
-            handleGitHubCallback();
-        }
+    } catch (error) {
+        console.error("Error in fetch call:", error);
+    }
+}
+
+// Ensure that handleGitHubCallback is called only when on the callback page
+if (window.location.pathname.includes("callback.html")) {
+    handleGitHubCallback();
+}
+
     </script>
 </body>
 </html>
