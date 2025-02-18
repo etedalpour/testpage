@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Testing API Accessibility</h1>
+    <p id="status">Loading...</p> <!-- Status message will be displayed here -->
+
+    <script>
+        // Automatically called when the page is loaded
+        async function testAPIAccessibility() {
+            const backendUrl = "https://alietedal.ir:8080"; // Your backend URL
+
+            try {
+                // Send a test request to the API
+                const response = await fetch(`${backendUrl}/api/github-auth`, {
+                    method: "POST", // You can change this to "GET" if you're just testing connectivity
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ code: "test_code" }) // Just send some dummy data
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Handle success
+                const data = await response.json();
+                document.getElementById("status").textContent = "API Test Success: " + JSON.stringify(data);
+            } catch (error) {
+                // Handle error
+                console.error("❌ Error calling API:", error);
+                document.getElementById("status").textContent = "API Test Failed: " + error.message;
+            }
+        }
+
+        // Call the function when the page is loaded
+        window.onload = testAPIAccessibility;
+    </script>
+</body>
+</html>
