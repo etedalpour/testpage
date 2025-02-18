@@ -10,7 +10,7 @@ async function handleGitHubCallback() {
 
     console.log("✅ GitHub OAuth Code Received:", code);
 
-    const backendUrl = "https://37.252.14.103:3000";
+    const backendUrl = "https://37.252.14.103:443";
 
     try {
         const response = await fetch(`${backendUrl}/api/github-auth`, {
