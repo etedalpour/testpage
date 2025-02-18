@@ -9,7 +9,7 @@ async function handleGitHubCallback() {
     }
 
     console.log("✅ GitHub OAuth Code Received:", code);
-    const backendUrl = "https://alietedal.ir:443";
+    const backendUrl = "https://alietedal.ir:600";
 
     try {
         const response = await fetch(`${backendUrl}/api/github-auth`, {
