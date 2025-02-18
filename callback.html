@@ -16,7 +16,7 @@
                 console.log("GitHub Authorization Code:", code);
 
                 // Send the code to the backend
-                const backendUrl = "http://79.57.80.38:3000"; // WSL Backend
+                const backendUrl = "http://37.252.14.103:3000"; // WSL Backend
                 const response = await fetch(`${backendUrl}/api/github-auth`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
