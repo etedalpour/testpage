@@ -24,7 +24,6 @@
             const code = params.get("code");
 
             if (code) {
-                // Send GitHub OAuth code to WSL backend
                 const response = await fetch(`${backendUrl}/api/github-auth`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
