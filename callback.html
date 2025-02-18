@@ -11,7 +11,7 @@
 
         console.log("GitHub Authorization Code:", code);
 
-        const backendUrl = "http://37.252.14.103:3000"; // Your backend server
+        const backendUrl = "https://37.252.14.103:3000"; // Your backend server
 
         try {
             const response = await fetch(`${backendUrl}/api/github-auth`, {
