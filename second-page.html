@@ -74,6 +74,7 @@
         function setupEventHandlers(userRepos) {
             const repoDropdown = document.getElementById("repoDropdown");
             const repoDetailsList = document.getElementById("repoDetailsList");
+            const monetizeButton = document.getElementById("monetizeButton");
 
             repoDropdown.addEventListener("change", () => {
                 const selectedRepoName = repoDropdown.value;
@@ -104,6 +105,59 @@
                     console.error("Repository not found in the userRepos array.", selectedRepoName);
                 }
             });
+
+            monetizeButton.addEventListener("click", async () => {
+                await monetizeRepository();
+            });
+        }
+
+        async function monetizeRepository() {
+            const repoDropdown = document.getElementById("repoDropdown");
+            const selectedRepoName = repoDropdown.value;
+
+            if (!selectedRepoName) {
+                updateStatusMessage("walletStatus", "Please select a repository to monetize.", "error");
+                return;
+            }
+
+            log("Monetizing repository:", selectedRepoName);
+
+            const repoDetailsList = document.getElementById("repoDetailsList");
+            const repoDetails = Array.from(repoDetailsList.querySelectorAll("li")).reduce((acc, li) => {
+                const [key, value] = li.textContent.split(": ").map(s => s.trim());
+                acc[key] = value;
+                return acc;
+            }, {});
+
+            const walletAddress = document.getElementById("accountAddress").textContent;
+            const payload = {
+                walletAddress,
+                numTokens: 10000,
+                metadata: repoDetails
+            };
+
+            log("Payload for Monetization:", payload);
+
+            try {
+                const response = await fetch("https://alietedal.ir:8080/api/create-token", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    updateStatusMessage("walletStatus", "Monetization successful!", "success");
+                    log("Monetization Response:", data);
+                } else {
+                    throw new Error(data.message || "Failed to monetize the repository.");
+                }
+            } catch (error) {
+                console.error("Error during monetization:", error);
+                updateStatusMessage("walletStatus", `Error: ${error.message}`, "error");
+            }
         }
 
         function updateGitHubUI(userData, userRepos) {
