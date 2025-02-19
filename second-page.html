@@ -53,7 +53,6 @@
             log("Initializing application...");
             updateStatusMessage("githubStatus", "Checking authentication...", "info");
 
-            // Attempt to load user data from localStorage
             const storedUserData = localStorage.getItem('githubUserData');
             const storedReposData = localStorage.getItem('githubReposData');
             
@@ -62,6 +61,7 @@
                 const userData = JSON.parse(storedUserData);
                 const userRepos = JSON.parse(storedReposData);
                 updateGitHubUI(userData, userRepos);
+                setupEventHandlers(userRepos); // Ensure event handlers are set up
                 updateStatusMessage("githubStatus", "Using cached GitHub data", "success");
             } else {
                 log("No GitHub data found in local storage.");
@@ -69,6 +69,41 @@
                 document.getElementById("githubUserId").textContent = "Not logged in";
                 updateStatusMessage("githubStatus", "Not logged in with GitHub", "info");
             }
+        }
+
+        function setupEventHandlers(userRepos) {
+            const repoDropdown = document.getElementById("repoDropdown");
+            const repoDetailsList = document.getElementById("repoDetailsList");
+
+            repoDropdown.addEventListener("change", () => {
+                const selectedRepoName = repoDropdown.value;
+                log("Selected Repo Name:", selectedRepoName);
+
+                const selectedRepo = userRepos.find(repo => repo.name === selectedRepoName);
+                log("Selected Repo Object:", selectedRepo);
+
+                repoDetailsList.innerHTML = "";
+
+                if (selectedRepo) {
+                    const keyInfo = {
+                        "Name": selectedRepo.name,
+                        "Description": selectedRepo.description || "No description",
+                        "Language": selectedRepo.language || "Not specified",
+                        "Stars": selectedRepo.stargazers_count,
+                        "Forks": selectedRepo.forks_count,
+                        "Created": new Date(selectedRepo.created_at).toLocaleDateString(),
+                        "Last Updated": new Date(selectedRepo.updated_at).toLocaleDateString()
+                    };
+
+                    for (const [key, value] of Object.entries(keyInfo)) {
+                        const li = document.createElement("li");
+                        li.textContent = `${key}: ${value}`;
+                        repoDetailsList.appendChild(li);
+                    }
+                } else {
+                    console.error("Repository not found in the userRepos array.", selectedRepoName);
+                }
+            });
         }
 
         function updateGitHubUI(userData, userRepos) {
