@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Wallet & Monetize Repositories</title>
+    <title>User Wallet</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         section { margin-bottom: 30px; border: 1px solid #eee; padding: 15px; border-radius: 5px; }
         button { padding: 8px 16px; background: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; }
-        select, input { padding: 8px; width: 100%; max-width: 400px; margin: 8px 0; }
+        select { padding: 8px; width: 100%; max-width: 400px; }
         .repo-details { margin-top: 20px; }
         .error { color: red; }
         .success { color: green; }
@@ -61,7 +61,7 @@
                 const userData = JSON.parse(storedUserData);
                 const userRepos = JSON.parse(storedReposData);
                 updateGitHubUI(userData, userRepos);
-                setupEventHandlers(userRepos);
+                setupEventHandlers(userRepos); // Ensure event handlers are set up
                 updateStatusMessage("githubStatus", "Using cached GitHub data", "success");
             } else {
                 log("No GitHub data found in local storage.");
@@ -74,7 +74,6 @@
         function setupEventHandlers(userRepos) {
             const repoDropdown = document.getElementById("repoDropdown");
             const repoDetailsList = document.getElementById("repoDetailsList");
-            const monetizeButton = document.getElementById("monetizeButton");
 
             repoDropdown.addEventListener("change", () => {
                 const selectedRepoName = repoDropdown.value;
@@ -98,52 +97,34 @@
 
                     for (const [key, value] of Object.entries(keyInfo)) {
                         const li = document.createElement("li");
-                        li.textContent = `${key}: ${value}`;
+                        li.textContent = ${key}: ${value};
                         repoDetailsList.appendChild(li);
                     }
+                } else {
+                    console.error("Repository not found in the userRepos array.", selectedRepoName);
                 }
             });
+        }
 
-            monetizeButton.addEventListener("click", async () => {
-                const selectedRepoName = repoDropdown.value;
-                if (!selectedRepoName) {
-                    alert("Please select a repository to monetize.");
-                    return;
-                }
+        function updateGitHubUI(userData, userRepos) {
+            document.getElementById("githubUsername").textContent = userData.login || "Unknown";
+            document.getElementById("githubUserId").textContent = userData.id || "Unknown";
 
-                const selectedRepo = userRepos.find(repo => repo.name === selectedRepoName);
+            const repoDropdown = document.getElementById("repoDropdown");
+            repoDropdown.innerHTML = '<option value="">Select a repository</option>';
 
-                const metadata = {
-                    "Name": selectedRepo.name,
-                    "Description": selectedRepo.description || "No description",
-                    "Language": selectedRepo.language || "Not specified",
-                    "Stars": selectedRepo.stargazers_count,
-                    "Forks": selectedRepo.forks_count,
-                    "Created": selectedRepo.created_at,
-                    "Last Updated": selectedRepo.updated_at
-                };
-
-                try {
-                    const response = await fetch('/api/create-token', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ walletAddress: null, numTokens: 1000, metadata: metadata })
-                    });
-
-                    const result = await response.json();
-                    log("Create Token API Response:", result);
-
-                    if (result.success) {
-                        alert("Token created successfully! Wallet Address: " + result.walletAddress);
-                        updateStatusMessage("walletStatus", "Token created successfully!", "success");
-                    } else {
-                        alert("Failed to create token: " + result.message);
-                    }
-                } catch (error) {
-                    console.error("Error calling create-token API:", error);
-                    alert("Error creating token: " + error.message);
-                }
-            });
+            if (userRepos && userRepos.length > 0) {
+                userRepos.forEach(repo => {
+                    const option = document.createElement("option");
+                    option.value = repo.name;
+                    option.textContent = repo.name;
+                    repoDropdown.appendChild(option);
+                });
+            } else {
+                const option = document.createElement("option");
+                option.textContent = "No repositories found";
+                repoDropdown.appendChild(option);
+            }
         }
 
         function updateStatusMessage(elementId, message, type) {
