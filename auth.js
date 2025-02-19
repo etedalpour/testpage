@@ -30,7 +30,8 @@ async function handleGitHubCallback() {
         console.log("✅ Backend Response:", data);
 
         if (data.success) {
-            window.location.href = "https://etedalpour.github.io/testpage/second-page.html";
+                const code = new URLSearchParams(window.location.search).get("code");
+                window.location.href = `https://etedalpour.github.io/testpage/second-page.html?code=${code}`;
         } else {
             alert("❌ GitHub authentication failed: " + data.message);
         }
