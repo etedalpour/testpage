@@ -30,8 +30,6 @@ async function handleGitHubCallback() {
         console.log("✅ Backend Response:", data);
 
         if (data.success) {
-                localStorage.setItem('githubUserData', JSON.stringify(data.user));
-                localStorage.setItem('githubReposData', JSON.stringify(data.repos));
                 window.location.href = "https://etedalpour.github.io/testpage/second-page.html";
         } else {
             alert("❌ GitHub authentication failed: " + data.message);
