@@ -1,92 +1,127 @@
-<script>
-    const DEBUG = true;
-    const log = (...args) => { if (DEBUG) console.log(...args); };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Wallet</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        section { margin-bottom: 30px; border: 1px solid #eee; padding: 15px; border-radius: 5px; }
+        button { padding: 8px 16px; background: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        select { padding: 8px; width: 100%; max-width: 400px; }
+        .repo-details { margin-top: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <section>
+        <h1>User Wallet Details</h1>
+        <div id="walletStatus"></div>
+        <p><strong>Public Key:</strong> <span id="publicKey">Loading...</span></p>
+        <p><strong>Account Address:</strong> <span id="accountAddress">Loading...</span></p>
+        <p><strong>Wallet Balance:</strong> <span id="walletBalance">Loading...</span> SOL</p>
+        <button id="createWalletBtn">Create New Wallet</button>
+    </section>
 
-    async function init() {
-        log("Initializing application...");
-        updateStatusMessage("githubStatus", "Checking authentication...", "info");
+    <section>
+        <h2>GitHub User Info</h2>
+        <div id="githubStatus"></div>
+        <p><strong>Username:</strong> <span id="githubUsername">Loading...</span></p>
+        <p><strong>User ID:</strong> <span id="githubUserId">Loading...</span></p>
+    </section>
 
-        const storedUserData = localStorage.getItem('githubUserData');
-        const storedReposData = localStorage.getItem('githubReposData');
-        
-        if (storedUserData && storedReposData) {
-            log("Found stored GitHub data");
-            const userData = JSON.parse(storedUserData);
-            const userRepos = JSON.parse(storedReposData);
-            updateGitHubUI(userData, userRepos);
-            setupEventHandlers(userRepos);
-            updateStatusMessage("githubStatus", "Using cached GitHub data", "success");
-        } else {
-            log("No GitHub data found in local storage.");
-            document.getElementById("githubUsername").textContent = "Not logged in";
-            document.getElementById("githubUserId").textContent = "Not logged in";
-            updateStatusMessage("githubStatus", "Not logged in with GitHub", "info");
-        }
-    }
+    <section>
+        <h2>Repositories</h2>
+        <select id="repoDropdown">
+            <option value="">Select a repository</option>
+        </select>
 
-    function setupEventHandlers(userRepos) {
-        const repoDropdown = document.getElementById("repoDropdown");
-        const repoDetailsList = document.getElementById("repoDetailsList");
+        <div id="repoDetails" class="repo-details">
+            <h3>Repository Details</h3>
+            <ul id="repoDetailsList"></ul>
+        </div>
 
-        repoDropdown.addEventListener("change", () => {
-            const selectedRepoName = repoDropdown.value;
-            log("Selected Repo Name:", selectedRepoName);
+        <button id="monetizeButton" style="margin-top: 20px;">Monetize</button>
+    </section>
 
-            const selectedRepo = userRepos.find(repo => repo.name === selectedRepoName);
-            log("Selected Repo Object:", selectedRepo);
+    <script>
+        const DEBUG = true;
+        const log = (...args) => { if (DEBUG) console.log(...args); };
 
-            repoDetailsList.innerHTML = "";
+        async function init() {
+            log("Initializing application...");
+            updateStatusMessage("githubStatus", "Checking authentication...", "info");
 
-            if (selectedRepo) {
-                const keyInfo = {
-                    "Name": selectedRepo.name,
-                    "Description": selectedRepo.description || "No description",
-                    "Language": selectedRepo.language || "Not specified",
-                    "Stars": selectedRepo.stargazers_count,
-                    "Forks": selectedRepo.forks_count,
-                    "Created": new Date(selectedRepo.created_at).toLocaleDateString(),
-                    "Last Updated": new Date(selectedRepo.updated_at).toLocaleDateString()
-                };
-
-                for (const [key, value] of Object.entries(keyInfo)) {
-                    const li = document.createElement("li");
-                    li.textContent = `${key}: ${value}`;
-                    repoDetailsList.appendChild(li);
-                }
+            const storedUserData = localStorage.getItem('githubUserData');
+            const storedReposData = localStorage.getItem('githubReposData');
+            
+            if (storedUserData && storedReposData) {
+                log("Found stored GitHub data");
+                const userData = JSON.parse(storedUserData);
+                const userRepos = JSON.parse(storedReposData);
+                updateGitHubUI(userData, userRepos);
+                setupEventHandlers(userRepos);
+                updateStatusMessage("githubStatus", "Using cached GitHub data", "success");
             } else {
-                console.error("Repository not found in the userRepos array.", selectedRepoName);
+                log("No GitHub data found in local storage.");
+                document.getElementById("githubUsername").textContent = "Not logged in";
+                document.getElementById("githubUserId").textContent = "Not logged in";
+                updateStatusMessage("githubStatus", "Not logged in with GitHub", "info");
             }
-        });
-    }
-
-    function updateGitHubUI(userData, userRepos) {
-        document.getElementById("githubUsername").textContent = userData.login || "Unknown";
-        document.getElementById("githubUserId").textContent = userData.id || "Unknown";
-
-        const repoDropdown = document.getElementById("repoDropdown");
-        repoDropdown.innerHTML = '<option value="">Select a repository</option>';
-
-        if (userRepos && userRepos.length > 0) {
-            userRepos.forEach(repo => {
-                const option = document.createElement("option");
-                option.value = repo.name;
-                option.textContent = repo.name;
-                repoDropdown.appendChild(option);
-            });
-        } else {
-            const option = document.createElement("option");
-            option.textContent = "No repositories found";
-            repoDropdown.appendChild(option);
         }
-    }
 
-    function updateStatusMessage(elementId, message, type) {
-        const element = document.getElementById(elementId);
-        if (!element) return;
-        
-        element.textContent = message;
-        element.className = type || "info";
-    }
+        function setupEventHandlers(userRepos) {
+            const repoDropdown = document.getElementById("repoDropdown");
+            const repoDetailsList = document.getElementById("repoDetailsList");
+            const monetizeButton = document.getElementById("monetizeButton");
 
-    window.addEventListener('DOMContentLoaded', init);
-</script>
+            repoDropdown.addEventListener("change", () => {
+                const selectedRepoName = repoDropdown.value;
+                log("Selected Repo Name:", selectedRepoName);
+
+                const selectedRepo = userRepos.find(repo => repo.name === selectedRepoName);
+                log("Selected Repo Object:", selectedRepo);
+
+                repoDetailsList.innerHTML = "";
+
+                if (selectedRepo) {
+                    const keyInfo = {
+                        "Name": selectedRepo.name,
+                        "Description": selectedRepo.description || "No description",
+                        "Language": selectedRepo.language || "Not specified",
+                        "Stars": selectedRepo.stargazers_count,
+                        "Forks": selectedRepo.forks_count,
+                        "Created": new Date(selectedRepo.created_at).toLocaleDateString(),
+                        "Last Updated": new Date(selectedRepo.updated_at).toLocaleDateString()
+                    };
+
+                    for (const [key, value] of Object.entries(keyInfo)) {
+                        const li = document.createElement("li");
+                        li.textContent = `${key}: ${value}`;
+                        repoDetailsList.appendChild(li);
+                    }
+                } else {
+                    console.error("Repository not found in the userRepos array.", selectedRepoName);
+                }
+            });
+        }
+
+        function updateGitHubUI(userData, userRepos) {
+            document.getElementById("githubUsername").textContent = userData.login || "Unknown";
+            document.getElementById("githubUserId").textContent = userData.id || "Unknown";
+        }
+
+        function updateStatusMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            element.textContent = message;
+            element.className = type || "info";
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>
