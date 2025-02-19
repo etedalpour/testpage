@@ -6,9 +6,56 @@
     <title>GitHub Callback</title>
 </head>
 <body>
-    <h1>GitHub Callback Page</h1>
+    <h1>Processing GitHub Authentication...</h1>
 
-    <!-- Link to the shared auth.js file -->
-    <script src="auth.js"></script>
+    <script>
+        async function handleGitHubCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get("code");
+
+            if (!code) {
+                console.error("❌ GitHub OAuth code not found in URL!");
+                alert("GitHub authentication failed: No code found.");
+                return;
+            }
+
+            console.log("✅ GitHub OAuth Code Received:", code);
+            const backendUrl = "https://alietedal.ir:8080";
+
+            try {
+                const response = await fetch(`${backendUrl}/api/github-auth`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ code })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("✅ Backend Response:", data);
+
+                if (data.success) {
+                    // Store data in localStorage
+                    localStorage.setItem('githubUserData', JSON.stringify(data.user));
+                    localStorage.setItem('githubReposData', JSON.stringify(data.repos));
+
+                    // Redirect to the second page without the code parameter
+                    window.location.href = "https://etedalpour.github.io/testpage/second-page.html";
+                } else {
+                    alert("❌ GitHub authentication failed: " + data.message);
+                }
+            } catch (error) {
+                console.error("❌ Error communicating with backend:", error);
+                alert("Network error: " + error.message);
+            }
+        }
+
+        handleGitHubCallback();
+    </script>
 </body>
 </html>
