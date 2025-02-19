@@ -46,81 +46,32 @@
     </section>
 
     <script>
-        // Debug mode
         const DEBUG = true;
         const log = (...args) => { if (DEBUG) console.log(...args); };
-        
-        const backendUrl = "https://alietedal.ir:8080";
-
-        let userData = null;
-        let userRepos = null;
 
         async function init() {
             log("Initializing application...");
             updateStatusMessage("githubStatus", "Checking authentication...", "info");
+
+            // Attempt to load user data from localStorage
+            const storedUserData = localStorage.getItem('githubUserData');
+            const storedReposData = localStorage.getItem('githubReposData');
             
-            // Extract the OAuth code from the URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get("code");
-            log("Extracted OAuth Code:", code);
-
-            if (code) {
-                log("GitHub code found in URL. Authenticating with server...");
-                await authenticateWithGitHub(code);
+            if (storedUserData && storedReposData) {
+                log("Found stored GitHub data");
+                const userData = JSON.parse(storedUserData);
+                const userRepos = JSON.parse(storedReposData);
+                updateGitHubUI(userData, userRepos);
+                updateStatusMessage("githubStatus", "Using cached GitHub data", "success");
             } else {
-                log("No OAuth code found in URL. Checking local storage for cached data...");
-                const storedUserData = localStorage.getItem('githubUserData');
-                const storedReposData = localStorage.getItem('githubReposData');
-                
-                if (storedUserData && storedReposData) {
-                    log("Found cached GitHub data in local storage.");
-                    userData = JSON.parse(storedUserData);
-                    userRepos = JSON.parse(storedReposData);
-                    updateGitHubUI();
-                    updateStatusMessage("githubStatus", "Using cached GitHub data", "success");
-                } else {
-                    log("No GitHub data found in local storage.");
-                    document.getElementById("githubUsername").textContent = "Not logged in";
-                    document.getElementById("githubUserId").textContent = "Not logged in";
-                    updateStatusMessage("githubStatus", "Not logged in with GitHub", "info");
-                }
+                log("No GitHub data found in local storage.");
+                document.getElementById("githubUsername").textContent = "Not logged in";
+                document.getElementById("githubUserId").textContent = "Not logged in";
+                updateStatusMessage("githubStatus", "Not logged in with GitHub", "info");
             }
         }
 
-        async function authenticateWithGitHub(code) {
-            try {
-                log("Sending authentication request to the server...");
-                const response = await fetch(`${backendUrl}/api/github-auth`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ code })
-                });
-
-                const data = await response.json();
-                log("Received response from server:", data);
-
-                if (data.success && data.user) {
-                    userData = data.user;
-                    userRepos = data.repos || [];
-
-                    localStorage.setItem('githubUserData', JSON.stringify(userData));
-                    localStorage.setItem('githubReposData', JSON.stringify(userRepos));
-
-                    updateGitHubUI();
-                    updateStatusMessage("githubStatus", "Successfully authenticated with GitHub", "success");
-                } else {
-                    log("Failed GitHub authentication:", data.message);
-                    updateStatusMessage("githubStatus", "GitHub authentication failed", "error");
-                }
-            } catch (error) {
-                log("Error during authentication:", error);
-                updateStatusMessage("githubStatus", "Network error during GitHub authentication", "error");
-            }
-        }
-
-        function updateGitHubUI() {
-            if (!userData) return;
-
+        function updateGitHubUI(userData, userRepos) {
             document.getElementById("githubUsername").textContent = userData.login || "Unknown";
             document.getElementById("githubUserId").textContent = userData.id || "Unknown";
 
