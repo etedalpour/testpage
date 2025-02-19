@@ -46,5 +46,24 @@
     </section>
 
     <script src="auth.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("Initializing GitHub Authentication...");
+            const storedUserData = localStorage.getItem('githubUserData');
+            const storedReposData = localStorage.getItem('githubReposData');
+
+            if (storedUserData && storedReposData) {
+                console.log("Using cached GitHub data");
+                const userData = JSON.parse(storedUserData);
+                const userRepos = JSON.parse(storedReposData);
+                document.getElementById("githubUsername").textContent = userData.login || "Unknown";
+                document.getElementById("githubUserId").textContent = userData.id || "Unknown";
+            } else {
+                console.log("No GitHub data found in local storage.");
+                document.getElementById("githubUsername").textContent = "Not logged in";
+                document.getElementById("githubUserId").textContent = "Not logged in";
+            }
+        });
+    </script>
 </body>
 </html>
